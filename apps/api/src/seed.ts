@@ -1,0 +1,255 @@
+// seeders/20240101000000-initial-seed.ts
+import { QueryInterface } from 'sequelize';
+
+export default {
+  async up(queryInterface: QueryInterface) {
+    // 1. Seed spec table
+    await queryInterface.bulkInsert('spec', [
+      { id: 1, title: 'BD-200', createdAt: new Date(), updatedAt: new Date() },
+      { id: 2, title: 'BD-201', createdAt: new Date(), updatedAt: new Date() },
+      { id: 3, title: 'BD-202', createdAt: new Date(), updatedAt: new Date() },
+    ]);
+
+    // 2. Seed location table
+    await queryInterface.bulkInsert('location', [
+      { id: 1, name: 'First Floor', createdAt: new Date(), updatedAt: new Date() },
+      { id: 2, name: 'Second Floor', createdAt: new Date(), updatedAt: new Date() },
+      { id: 3, name: 'Basement', createdAt: new Date(), updatedAt: new Date() },
+      { id: 4, name: 'Exterior', createdAt: new Date(), updatedAt: new Date() },
+    ]);
+
+    // 3. Seed category table
+    await queryInterface.bulkInsert('category', [
+      { id: 1, name: 'Electrical', createdAt: new Date(), updatedAt: new Date() },
+      { id: 2, name: 'Plumbing', createdAt: new Date(), updatedAt: new Date() },
+      { id: 3, name: 'HVAC', createdAt: new Date(), updatedAt: new Date() },
+      { id: 4, name: 'Flooring', createdAt: new Date(), updatedAt: new Date() },
+      { id: 5, name: 'Fixtures', createdAt: new Date(), updatedAt: new Date() },
+    ]);
+
+    // 4. Seed phase table
+    await queryInterface.bulkInsert('phase', [
+      { id: 1, name: 'Design', createdAt: new Date(), updatedAt: new Date() },
+      { id: 2, name: 'Procurement', createdAt: new Date(), updatedAt: new Date() },
+      { id: 3, name: 'Installation', createdAt: new Date(), updatedAt: new Date() },
+      { id: 4, name: 'Testing', createdAt: new Date(), updatedAt: new Date() },
+      { id: 5, name: 'Complete', createdAt: new Date(), updatedAt: new Date() },
+    ]);
+
+    // 5. Seed address table
+    await queryInterface.bulkInsert('address', [
+      { id: 1, name: 'Main Warehouse', address: '123 Industrial Blvd, City, State 12345', createdAt: new Date(), updatedAt: new Date() },
+      { id: 2, name: 'Project Site A', address: '456 Construction Ave, City, State 12346', createdAt: new Date(), updatedAt: new Date() },
+      { id: 3, name: 'Project Site B', address: '789 Building St, City, State 12347', createdAt: new Date(), updatedAt: new Date() },
+      { id: 4, name: 'Storage Facility', address: '321 Storage Dr, City, State 12348', createdAt: new Date(), updatedAt: new Date() },
+    ]);
+
+    // 6. Seed vendor table
+    await queryInterface.bulkInsert('vendor', [
+      { id: 1, name: 'ABC Electrical Supply', addressId: 1, createdAt: new Date(), updatedAt: new Date() },
+      { id: 2, name: 'XYZ Plumbing Co', addressId: 1, createdAt: new Date(), updatedAt: new Date() },
+      { id: 3, name: 'Cool Air HVAC', addressId: 4, createdAt: new Date(), updatedAt: new Date() },
+      { id: 4, name: 'Premium Flooring Inc', addressId: 1, createdAt: new Date(), updatedAt: new Date() },
+      { id: 5, name: 'Fixture Masters LLC', addressId: 4, createdAt: new Date(), updatedAt: new Date() },
+    ]);
+
+    // 7. Seed specItem table (main table with all relationships)
+    await queryInterface.bulkInsert('specItem', [
+      {
+        id: 1,
+        specId: 1,
+        locationId: 1,
+        categoryId: 1,
+        shipsToAddressId: 2,
+        phaseId: 2,
+        vendorId: 1,
+        description: 'LED Recessed Lighting Fixtures - 6 inch',
+        basePrice: 45.00,
+        markupPercent: 20.00,
+        unitPrice: 54.00,
+        quantity: 24.00,
+        unit: 'EA',
+        poApprovalDate: new Date('2024-01-15'),
+        needBy: new Date('2024-02-01'),
+        expectedDelivery: new Date('2024-01-28'),
+        orderedDate: new Date('2024-01-16'),
+        shippedDate: new Date('2024-01-26'),
+        deliveredDate: new Date('2024-01-28'),
+        shippingNotes: 'Fragile - Handle with care',
+        shopsSend: new Date('2024-01-10'),
+        shopsApproved: new Date('2024-01-12'),
+        shopsDelivered: new Date('2024-01-28'),
+        note: 'Energy efficient LED fixtures for main conference room',
+        attachment_name: 'fixture_specs.pdf',
+        attachment_url: 'https://example.com/docs/fixture_specs.pdf',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 2,
+        specId: 1,
+        locationId: 2,
+        categoryId: 2,
+        shipsToAddressId: 2,
+        phaseId: 3,
+        vendorId: 2,
+        description: 'Chrome Bathroom Faucet Set',
+        basePrice: 125.00,
+        markupPercent: 25.00,
+        unitPrice: 156.25,
+        quantity: 8.00,
+        unit: 'SET',
+        poApprovalDate: new Date('2024-01-20'),
+        needBy: new Date('2024-02-15'),
+        expectedDelivery: new Date('2024-02-10'),
+        orderedDate: new Date('2024-01-22'),
+        shippedDate: new Date('2024-02-08'),
+        deliveredDate: null,
+        shippingNotes: 'Priority shipping requested',
+        shopsSend: new Date('2024-01-18'),
+        shopsApproved: new Date('2024-01-19'),
+        shopsDelivered: null,
+        note: 'High-quality faucets for executive bathrooms',
+        attachment_name: 'faucet_catalog.pdf',
+        attachment_url: 'https://example.com/docs/faucet_catalog.pdf',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 3,
+        specId: 2,
+        locationId: 1,
+        categoryId: 3,
+        shipsToAddressId: 3,
+        phaseId: 2,
+        vendorId: 3,
+        description: 'Central Air Conditioning Unit - 5 Ton',
+        basePrice: 3500.00,
+        markupPercent: 15.00,
+        unitPrice: 4025.00,
+        quantity: 2.00,
+        unit: 'EA',
+        poApprovalDate: new Date('2024-01-25'),
+        needBy: new Date('2024-03-01'),
+        expectedDelivery: new Date('2024-02-25'),
+        orderedDate: new Date('2024-01-26'),
+        shippedDate: null,
+        deliveredDate: null,
+        shippingNotes: 'Requires forklift for unloading',
+        shopsSend: new Date('2024-01-20'),
+        shopsApproved: new Date('2024-01-23'),
+        shopsDelivered: null,
+        note: 'Energy Star rated unit with warranty',
+        attachment_name: 'hvac_specifications.pdf',
+        attachment_url: 'https://example.com/docs/hvac_specifications.pdf',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 4,
+        specId: 2,
+        locationId: 3,
+        categoryId: 4,
+        shipsToAddressId: 3,
+        phaseId: 3,
+        vendorId: 4,
+        description: 'Luxury Vinyl Plank Flooring - Oak Finish',
+        basePrice: 2.50,
+        markupPercent: 30.00,
+        unitPrice: 3.25,
+        quantity: 1200.00,
+        unit: 'SF',
+        poApprovalDate: new Date('2024-02-01'),
+        needBy: new Date('2024-03-15'),
+        expectedDelivery: new Date('2024-03-10'),
+        orderedDate: new Date('2024-02-02'),
+        shippedDate: null,
+        deliveredDate: null,
+        shippingNotes: 'Deliver to basement loading dock',
+        shopsSend: new Date('2024-01-28'),
+        shopsApproved: new Date('2024-01-30'),
+        shopsDelivered: null,
+        note: 'Water-resistant flooring for basement area',
+        attachment_name: 'flooring_samples.pdf',
+        attachment_url: 'https://example.com/docs/flooring_samples.pdf',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 5,
+        specId: 3,
+        locationId: 4,
+        categoryId: 5,
+        shipsToAddressId: 2,
+        phaseId: 2,
+        vendorId: 5,
+        description: 'Outdoor Wall Sconce Lighting',
+        basePrice: 89.00,
+        markupPercent: 22.00,
+        unitPrice: 108.58,
+        quantity: 12.00,
+        unit: 'EA',
+        poApprovalDate: new Date('2024-02-05'),
+        needBy: new Date('2024-03-20'),
+        expectedDelivery: new Date('2024-03-15'),
+        orderedDate: null,
+        shippedDate: null,
+        deliveredDate: null,
+        shippingNotes: null,
+        shopsSend: new Date('2024-02-01'),
+        shopsApproved: new Date('2024-02-03'),
+        shopsDelivered: null,
+        note: 'Weather-resistant fixtures for exterior walls',
+        attachment_name: 'exterior_lighting.pdf',
+        attachment_url: 'https://example.com/docs/exterior_lighting.pdf',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 6,
+        specId: 1,
+        locationId: 2,
+        categoryId: 1,
+        shipsToAddressId: 2,
+        phaseId: 4,
+        vendorId: 1,
+        description: 'Electrical Panel Upgrade - 200 Amp',
+        basePrice: 850.00,
+        markupPercent: 18.00,
+        unitPrice: 1003.00,
+        quantity: 1.00,
+        unit: 'EA',
+        poApprovalDate: new Date('2024-01-10'),
+        needBy: new Date('2024-02-01'),
+        expectedDelivery: new Date('2024-01-25'),
+        orderedDate: new Date('2024-01-12'),
+        shippedDate: new Date('2024-01-23'),
+        deliveredDate: new Date('2024-01-25'),
+        shippingNotes: 'Certified electrician required for installation',
+        shopsSend: new Date('2024-01-05'),
+        shopsApproved: new Date('2024-01-08'),
+        shopsDelivered: new Date('2024-01-25'),
+        note: 'Main panel for second floor electrical system',
+        attachment_name: 'panel_datasheet.pdf',
+        attachment_url: 'https://example.com/docs/panel_datasheet.pdf',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+
+    console.log('✅ Database seeded successfully!');
+  },
+
+  async down(queryInterface: QueryInterface) {
+    // Delete in reverse order to respect foreign key constraints
+    await queryInterface.bulkDelete('specItem', {}, {});
+    await queryInterface.bulkDelete('vendor', {}, {});
+    await queryInterface.bulkDelete('address', {}, {});
+    await queryInterface.bulkDelete('phase', {}, {});
+    await queryInterface.bulkDelete('category', {}, {});
+    await queryInterface.bulkDelete('location', {}, {});
+    await queryInterface.bulkDelete('spec', {}, {});
+    
+    console.log('✅ Database seed rolled back successfully!');
+  },
+};
