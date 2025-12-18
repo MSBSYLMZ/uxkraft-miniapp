@@ -95,7 +95,7 @@ export default function SpecItemsList() {
   }
 
   const fetchData = async () => {
-    const params = new URLSearchParams({...filters, page: String(filters.page), limit: String(filters.limit)});
+    const params = new URLSearchParams({ ...filters, page: String(filters.page), limit: String(filters.limit) });
     const response = await fetch('api/spec-item?' + params.toString());
     const parsed = await response.json();
     const { data, ...paginationData } = parsed;
@@ -227,7 +227,8 @@ export default function SpecItemsList() {
               </SelectContent>
             </Select>
           </div>
-          <Pagination className="justify-end!">
+          <Pagination className="justify-end! gap-4">
+            <p className="mt-1.5"> {paginationData.limit * (paginationData.currentPage - 1) + 1} - {Math.min(paginationData.currentPage * paginationData.limit, paginationData.totalResults)} of {paginationData.totalResults}</p>
             <PaginationContent>
               {
                 paginationData.currentPage === 1 ? null :

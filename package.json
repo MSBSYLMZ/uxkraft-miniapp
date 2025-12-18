@@ -22,5 +22,8 @@
     "url": "https://github.com/MSBSYLMZ/uxkraft-miniapp/issues"
   },
   "homepage": "https://github.com/MSBSYLMZ/uxkraft-miniapp#readme",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }
