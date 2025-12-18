@@ -108,6 +108,9 @@ export class SpecItem extends Model<SpecItem> {
   @Column({ type: DataType.DATE, allowNull: true })
   shopsDelivered: Date
 
+  @Column({ type: DataType.STRING, allowNull: false })
+  shipsFrom: string;
+
   @Column({ type: DataType.STRING, allowNull: true })
   note: string
 

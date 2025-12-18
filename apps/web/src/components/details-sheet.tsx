@@ -1,16 +1,40 @@
 import type { SpecItem } from "@/interfaces";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { DatePicker } from "./ui/datepicker";
 import { Textarea } from "./ui/textarea";
 import { useMemo } from "react";
+import { toast } from "sonner";
 
 
-export default function DetailsSheet(props: { open: boolean, setOpen: (open: boolean) => void, item: SpecItem }) {
+export default function DetailsSheet(props: { open: boolean, setOpen: (open: boolean) => void, item: SpecItem, onUpdate: () => void }) {
 
   const deliveryDifference = useMemo(() => {
     return props.item.expectedDelivery && props.item.needBy ? Math.ceil((new Date(props.item.expectedDelivery).getTime() - new Date(props.item.needBy).getTime()) / (1000 * 60 * 60 * 24)) : undefined
   }, [props.item.expectedDelivery, props.item.needBy])
+
+  const handleUpdate = async (key: string, value: any) => {
+    const data = {
+      id: props.item.id,
+      [key]: value
+    }
+
+    const response = await fetch("api/spec-item", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
+      body: JSON.stringify([data]),
+
+    })
+
+    if (response.ok) {
+      toast.success("Item updated successfully")
+      props.onUpdate();
+    } else {
+      toast.error("Failed to update item")
+    }
+  }
 
   return (
     <Sheet open={props.open && !!props.item} onOpenChange={props.setOpen}>
@@ -37,7 +61,7 @@ export default function DetailsSheet(props: { open: boolean, setOpen: (open: boo
             </div>
             <div className="w-[30%]">
               <h2 className="text-gray-600 font-semibold">Ship From</h2>
-              <h1 className="font-semibold">{props.item.vendor.adress?.name}</h1>
+              <h1 className="font-semibold">{props.item.shipsFrom}</h1>
             </div>
             <div className="w-[30%]">
               <h2 className="text-gray-600 font-semibold">Notes for this item</h2>
@@ -89,15 +113,15 @@ export default function DetailsSheet(props: { open: boolean, setOpen: (open: boo
             <h1 className="w-full">Planning & Requirements </h1>
             <div className="w-[31%] mb-8">
               <h2>PO Approval Date</h2>
-              <DatePicker date={props.item.poApprovalDate} onChange={() => { }} />
+              <DatePicker date={props.item.poApprovalDate} onChange={(date) => { handleUpdate("poApprovalDate", date) }} />
             </div>
             <div className="w-[31%] mb-8">
               <h2>Hotel Need by Date</h2>
-              <DatePicker date={props.item.needBy} onChange={() => { }} />
+              <DatePicker date={props.item.needBy} onChange={(date) => { handleUpdate("needBy", date) }} />
             </div>
             <div className="w-[31%] mb-8">
               <h2>Expected Delivery</h2>
-              <DatePicker date={props.item.expectedDelivery} onChange={() => { }} />
+              <DatePicker date={props.item.expectedDelivery} onChange={(date) => { handleUpdate("expectedDelivery", date) }} />
             </div>
             <div className="w-full flex justify-between">
               <div></div>
@@ -110,30 +134,30 @@ export default function DetailsSheet(props: { open: boolean, setOpen: (open: boo
             <h1 className="w-full">Production & Shop </h1>
             <div className="w-[30%] mb-8">
               <h2>CFA/Shops Send</h2>
-              <DatePicker date={props.item.shopsSend} onChange={() => { }} />
+              <DatePicker date={props.item.shopsSend} onChange={(date) => { handleUpdate("shopsSend", date) }} />
             </div>
             <div className="w-[30%] mb-8">
               <h2>CFA/Shops Approved</h2>
-              <DatePicker date={props.item.shopsApproved} onChange={() => { }} />
+              <DatePicker date={props.item.shopsApproved} onChange={(date) => { handleUpdate("shopsApproved", date) }} />
             </div>
             <div className="w-[30%] mb-8">
               <h2>CFA/Shops Delivered</h2>
-              <DatePicker date={props.item.shopsDelivered} onChange={() => { }} />
+              <DatePicker date={props.item.shopsDelivered} onChange={(date) => { handleUpdate("shopsDelivered", date) }} />
             </div>
           </div>
           <div className="flex flex-wrap gap-4 bg-white p-4 mt-4">
             <h1 className="w-full">Planning & Requirements </h1>
             <div className="w-[30%] mb-8">
               <h2>Ordered Date</h2>
-              <DatePicker date={props.item.orderedDate} onChange={() => { }} />
+              <DatePicker date={props.item.orderedDate} onChange={(date) => { handleUpdate("orderedDate", date) }} />
             </div>
             <div className="w-[30%] mb-8">
               <h2>Shipped Date</h2>
-              <DatePicker date={props.item.shippedDate} onChange={() => { }} />
+              <DatePicker date={props.item.shippedDate} onChange={(date) => { handleUpdate("shippedDate", date) }} />
             </div>
             <div className="w-[30%] mb-8">
               <h2>Delivered Date</h2>
-              <DatePicker date={props.item.deliveredDate} onChange={() => { }} />
+              <DatePicker date={props.item.deliveredDate} onChange={(date) => { handleUpdate("deliveredDate", date) }} />
             </div>
 
             <div className="w-full">

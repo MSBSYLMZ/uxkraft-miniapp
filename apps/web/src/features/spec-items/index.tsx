@@ -5,15 +5,24 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronDown, FileStack, FolderDown, Search, SquarePen, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { SpecItem } from "@/interfaces";
 import type { CheckedState } from "@radix-ui/react-checkbox";
 import UpdateTracking from "@/components/update-tracking-sheet";
 import BulkEditSheet from "@/components/bulk-edit-sheet";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+
+interface PaginationData {
+  currentPage: number,
+  limit: number,
+  totalPages: number,
+  totalResults: number
+}
 
 
 export default function SpecItemsList() {
   const [data, setData] = useState<SpecItem[]>([]);
+  const [paginationData, setPaginationData] = useState<PaginationData>({ currentPage: 1, limit: 5, totalPages: 1, totalResults: 0 });
   const [detailsSheetData, setDetailsSheetData] = useState<{ open: boolean, item: SpecItem | null }>({
     open: false,
     item: null
@@ -31,9 +40,10 @@ export default function SpecItemsList() {
   const [checkedItemIds, setCheckedItemIds] = useState<Set<number>>(new Set());
   const [filters, setFilters] = useState({
     orderBy: "",
-    query: ""
+    query: "",
+    page: 1,
+    limit: 5
   });
-
 
   const handleOpenDetailsSheet = (itemId: number) => {
     const findItem = data.find(item => item.id === itemId);
@@ -85,11 +95,25 @@ export default function SpecItemsList() {
   }
 
   const fetchData = async () => {
-    const params = new URLSearchParams(filters);
-    const response = await fetch('http://localhost:3000/spec-item?' + params.toString());
+    const params = new URLSearchParams({...filters, page: String(filters.page), limit: String(filters.limit)});
+    const response = await fetch('api/spec-item?' + params.toString());
     const parsed = await response.json();
-    setData(parsed.map((item: SpecItem) => ({ ...item, checked: false })));
+    const { data, ...paginationData } = parsed;
+    setPaginationData(paginationData);
+    setData(data.map((item: SpecItem) => ({ ...item, checked: false })));
   }
+
+  const pages = useMemo(() => {
+    const minPage = Math.max(1, paginationData.currentPage - 1);
+    const maxPage = Math.min(paginationData.totalPages, paginationData.currentPage + 2);
+    return Array.from({ length: maxPage - minPage + 1 }, (_, i) => minPage + i);
+  }, [paginationData]);
+
+  const handleOnUpdate = async () => {
+    setCheckedItemIds(new Set([]));
+    await fetchData();
+  }
+
 
   useEffect(() => {
     fetchData();
@@ -111,11 +135,11 @@ export default function SpecItemsList() {
               <Search />
             </InputGroupAddon>
           </InputGroup>
-          <Button title="Phase" className="rounded-1 h-12 my-4 bg-white text-black border-2 border-gray-300">
+          <Button onClick={() => { setFilters({ ...filters, orderBy: filters.orderBy && filters.orderBy === 'phase' ? 'phase_desc' : 'phase' }) }} title="Phase" className="rounded-1 h-12 my-4 bg-white text-black border-2 border-gray-300">
             <p>Phase</p>
             <ChevronDown />
           </Button>
-          <Button title="Phase" className="rounded-1 h-12 my-4 bg-white text-black border-2 border-gray-300">
+          <Button onClick={() => { setFilters({ ...filters, orderBy: filters.orderBy && filters.orderBy === 'vendor' ? 'vendor_desc' : 'vendor' }) }} title="Phase" className="rounded-1 h-12 my-4 bg-white text-black border-2 border-gray-300">
             <p>Vendor</p>
             <ChevronDown />
           </Button>
@@ -151,7 +175,7 @@ export default function SpecItemsList() {
         <Table className="border-2 border-gray-300 rounded-1">
           <TableHeader className="bg-stone-100 border-slate-400">
             <TableRow>
-              <TableHead className="text-left border pr-2!"><Checkbox onCheckedChange={changeCheckForAll} /></TableHead>
+              <TableHead className="text-left border pr-2!"><Checkbox className="border-gray-600" onCheckedChange={changeCheckForAll} /></TableHead>
               <TableHead className="border">Item #</TableHead>
               <TableHead className="border">Spec #</TableHead>
               <TableHead className="border">Item Name</TableHead>
@@ -167,7 +191,7 @@ export default function SpecItemsList() {
           <TableBody>
             {data.map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="text-left border"><Checkbox checked={item.checked} onCheckedChange={(checked: CheckedState) => { handleCheckedChange(checked, item.id) }} /></TableCell>
+                <TableCell className="text-left border"><Checkbox className="border-gray-600" checked={item.checked} onCheckedChange={(checked: CheckedState) => { handleCheckedChange(checked, item.id) }} /></TableCell>
                 <TableCell className="text-left border">{item.id}</TableCell>
                 <TableCell className="text-left border">{item.spec?.title}</TableCell>
                 <TableCell onClick={() => { handleOpenDetailsSheet(item.id) }} className="text-left border text-red-800 cursor-pointer">{item.name}</TableCell>
@@ -179,7 +203,7 @@ export default function SpecItemsList() {
                   <p className="bg-gray-300 text-center w-8">{item.phase.name}</p>
                   {/* </div> */}
                 </TableCell>
-                <TableCell className="text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((+item.unitPrice + (item.unitPrice * item.markupPercent / 100) * item.quantity))}</TableCell>
+                <TableCell className="text-right">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(((+item.unitPrice + (item.unitPrice * item.markupPercent / 100)) * item.quantity))}</TableCell>
                 <TableCell className="text-left border">{item.shippingNotes}</TableCell>
                 <TableCell className="text-left border font-semibold cursor-pointer">Edit </TableCell>
               </TableRow>
@@ -187,10 +211,10 @@ export default function SpecItemsList() {
           </TableBody>
         </Table>
 
-        <div className="flex gap-4 justify-between mt-4">
+        <div className="flex gap-4 justify-between mt-4 w-full">
           <div className="flex gap-4 justify-between">
-            <p>Rows per page</p>
-            <Select defaultValue="5">
+            <p className="w-28">Rows per page</p>
+            <Select defaultValue="5" onValueChange={(value) => { setFilters({ ...filters, limit: +value, page: 1 }) }}>
               <SelectTrigger className="w-24 border-gray-400">
                 <SelectValue />
               </SelectTrigger>
@@ -203,16 +227,39 @@ export default function SpecItemsList() {
               </SelectContent>
             </Select>
           </div>
+          <Pagination className="justify-end!">
+            <PaginationContent>
+              {
+                paginationData.currentPage === 1 ? null :
 
+                  <PaginationItem>
+                    <PaginationPrevious href="#" onClick={() => { setFilters({ ...filters, page: paginationData.currentPage - 1 }) }} />
+                  </PaginationItem>
+              }
+              {
+                pages.map((page) => (
+                  <PaginationItem>
+                    <PaginationLink onClick={() => { setFilters({ ...filters, page: page }) }} isActive={page === paginationData.currentPage}>{page}</PaginationLink>
+                  </PaginationItem>
+                ))
+              }
+              {
+                paginationData.totalPages === paginationData.currentPage ? null :
+                  <PaginationItem>
+                    <PaginationNext href="#" onClick={() => { setFilters({ ...filters, page: paginationData.currentPage + 1 }) }} />
+                  </PaginationItem>
+              }
+            </PaginationContent>
+          </Pagination>
         </div>
       </div>
       {
         detailsSheetData.item ?
-          <DetailsSheet open={detailsSheetData.open} item={detailsSheetData.item} setOpen={(open: boolean) => { if (!open) { setDetailsSheetData({ open: false, item: null }) } }} />
+          <DetailsSheet open={detailsSheetData.open} item={detailsSheetData.item} setOpen={(open: boolean) => { if (!open) { setDetailsSheetData({ open: false, item: null }) } }} onUpdate={handleOnUpdate} />
           : updateTrackingSheetData.items && updateTrackingSheetData.items.length > 0 ?
-            <UpdateTracking open={updateTrackingSheetData.open} setOpen={(open: boolean) => { if (!open) { setUpdateTrackingSheetData({ open: false, items: [] }) } }} items={updateTrackingSheetData.items} />
+            <UpdateTracking open={updateTrackingSheetData.open} setOpen={(open: boolean) => { if (!open) { setUpdateTrackingSheetData({ open: false, items: [] }) } }} items={updateTrackingSheetData.items} onUpdate={handleOnUpdate} />
             : bulkEditSheetData.items && bulkEditSheetData.items.length > 0 ?
-              <BulkEditSheet open={bulkEditSheetData.open} setOpen={(open: boolean) => { if (!open) { setBulkEditSheetData({ open: false, items: [] }) } }} items={bulkEditSheetData.items} />
+              <BulkEditSheet open={bulkEditSheetData.open} setOpen={(open: boolean) => { if (!open) { setBulkEditSheetData({ open: false, items: [] }) } }} items={bulkEditSheetData.items} onUpdate={handleOnUpdate} />
               : null
       }
     </>

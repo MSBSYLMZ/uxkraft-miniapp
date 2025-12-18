@@ -26,6 +26,7 @@ export interface SpecItem {
   orderedDate: Date;
   shippedDate: Date;
   deliveredDate: Date;
+  shipsFrom: string;
   shippingNotes: string;
   shopsSend: Date;
   shopsApproved: Date;

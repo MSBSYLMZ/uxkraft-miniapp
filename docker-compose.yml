@@ -16,6 +16,22 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+  app:
+    build: .
+    container_name: uxkraft-app
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: postgres
+      DB_NAME: miniapp
+      DB_SSL: false
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   pgdata:

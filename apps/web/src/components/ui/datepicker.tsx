@@ -31,7 +31,7 @@ function isValidDate(date: Date | undefined) {
   return !isNaN(date.getTime())
 }
 
-export function DatePicker(props: { date?: Date | string, onChange: (date: Date) => void }) {
+export function DatePicker(props: { date?: Date | string, onChange: (date: Date | null) => void }) {
   const [open, setOpen] = React.useState(false)
   const [date, setDate] = React.useState<Date | undefined>(
     props.date ? new Date(props.date) : undefined
@@ -45,7 +45,7 @@ export function DatePicker(props: { date?: Date | string, onChange: (date: Date)
         <Input
           id="date"
           value={value}
-          placeholder="June 01, 2025"
+          placeholder="mm/dd/yyyy"
           className="bg-background pr-10"
           onChange={(e) => {
             const date = new Date(e.target.value)
@@ -53,6 +53,7 @@ export function DatePicker(props: { date?: Date | string, onChange: (date: Date)
             if (isValidDate(date)) {
               setDate(date)
               setMonth(date)
+              props.onChange(date)
             }
           }}
           onKeyDown={(e) => {
@@ -86,6 +87,7 @@ export function DatePicker(props: { date?: Date | string, onChange: (date: Date)
               month={month}
               onMonthChange={setMonth}
               onSelect={(date) => {
+                props.onChange(date || null)
                 setDate(date)
                 setValue(formatDate(date))
                 setOpen(false)
