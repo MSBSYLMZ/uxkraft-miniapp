@@ -3,12 +3,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { DatePicker } from "./ui/datepicker";
 import { Textarea } from "./ui/textarea";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 
 export default function DetailsSheet(props: { open: boolean, setOpen: (open: boolean) => void, item: SpecItem, onUpdate: () => void }) {
-
+  const [shippingNotes, setShippingNotes] = useState(props.item.shippingNotes);
   const deliveryDifference = useMemo(() => {
     return props.item.expectedDelivery && props.item.needBy ? Math.ceil((new Date(props.item.expectedDelivery).getTime() - new Date(props.item.needBy).getTime()) / (1000 * 60 * 60 * 24)) : undefined
   }, [props.item.expectedDelivery, props.item.needBy])
@@ -162,7 +162,7 @@ export default function DetailsSheet(props: { open: boolean, setOpen: (open: boo
 
             <div className="w-full">
               <h1>Shipping Notes</h1>
-              <Textarea value={props.item.shippingNotes}></Textarea>
+              <Textarea value={shippingNotes} onBlur={() => { handleUpdate('shippingNotes', shippingNotes) }} onChange={(e) => { setShippingNotes((_) => e.target.value) }}></Textarea>
             </div>
           </div>
         </SheetHeader>
